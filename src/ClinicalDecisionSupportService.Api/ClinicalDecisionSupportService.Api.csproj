@@ -1,18 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ClinicalDecisionSupportService.Application\ClinicalDecisionSupportService.Application.csproj" />
     <ProjectReference Include="..\ClinicalDecisionSupportService.Infrastructure\ClinicalDecisionSupportService.Infrastructure.csproj" />
   </ItemGroup>
-
 </Project>
