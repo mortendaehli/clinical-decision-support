@@ -1,6 +1,5 @@
 using ClinicalDecisionSupportService.Domain.Common;
 using ClinicalDecisionSupportService.Domain.Enums;
-using ClinicalDecisionSupportService.Domain.Scoring;
 using ClinicalDecisionSupportService.Domain.Services;
 using ClinicalDecisionSupportService.Domain.ValueObjects;
 
@@ -80,7 +79,7 @@ public sealed class CalculateNewsScoreQueryHandler : ICalculateNewsScoreQueryHan
             );
         }
 
-        if (!VitalSignCatalog.TryGetByCode(value.Trim(), out var rule))
+        if (!MeasurementTypeCode.TryParseStrict(value.Trim(), out var measurementType))
         {
             return DomainError.Validation(
                 code: "MEASUREMENT_TYPE_INVALID",
@@ -89,6 +88,6 @@ public sealed class CalculateNewsScoreQueryHandler : ICalculateNewsScoreQueryHan
             );
         }
 
-        return rule.Type;
+        return measurementType;
     }
 }

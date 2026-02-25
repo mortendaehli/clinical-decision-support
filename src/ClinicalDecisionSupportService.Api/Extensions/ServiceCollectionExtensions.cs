@@ -1,5 +1,9 @@
 using ClinicalDecisionSupportService.Application.Extensions;
+using ClinicalDecisionSupportService.Api.Endpoints.NewsScore;
+using ClinicalDecisionSupportService.Domain.Enums;
 using ClinicalDecisionSupportService.Infrastructure.Extensions;
+using Microsoft.OpenApi;
+using System.Text.Json.Nodes;
 
 namespace ClinicalDecisionSupportService.Api.Extensions;
 
@@ -20,7 +24,32 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddApiCoreServices(this IServiceCollection services)
     {
-        services.AddOpenApi();
+        services.AddOpenApi(options =>
+        {
+            options.AddSchemaTransformer((schema, context, _) =>
+            {
+                if (context.JsonTypeInfo.Type != typeof(MeasurementInput))
+                {
+                    return Task.CompletedTask;
+                }
+
+                if (
+                    schema.Properties is null
+                    || !schema.Properties.TryGetValue("type", out var measurementTypeSchema)
+                    || measurementTypeSchema is not OpenApiSchema openApiMeasurementTypeSchema
+                )
+                {
+                    return Task.CompletedTask;
+                }
+
+                openApiMeasurementTypeSchema.Type = JsonSchemaType.String;
+                openApiMeasurementTypeSchema.Enum = MeasurementTypeCode
+                    .SupportedCodes.Select(code => (JsonNode)JsonValue.Create(code)!)
+                    .ToList();
+
+                return Task.CompletedTask;
+            });
+        });
         return services;
     }
 

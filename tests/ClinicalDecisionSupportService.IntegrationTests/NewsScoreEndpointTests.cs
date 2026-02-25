@@ -7,9 +7,11 @@ namespace ClinicalDecisionSupportService.IntegrationTests;
 public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
+    private readonly WebApplicationFactory<Program> _factory;
 
     public NewsScoreEndpointTests(WebApplicationFactory<Program> factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -23,7 +25,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
                 new { type = "TEMP", value = 37 },
                 new { type = "HR", value = 60 },
                 new { type = "RR", value = 5 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
@@ -44,7 +46,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
                 new { type = "TEMP", value = 37 },
                 new { type = "HR", value = 60 },
                 new { type = "RR", value = 15 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
@@ -65,7 +67,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
                 new { type = "TEMP", value = 32 },
                 new { type = "HR", value = 30 },
                 new { type = "RR", value = 5 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
@@ -85,7 +87,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
             {
                 new { type = "TEMP", value = 37 },
                 new { type = "HR", value = 60 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
@@ -103,7 +105,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
                 new { type = "TEMP", value = 99 },
                 new { type = "HR", value = 60 },
                 new { type = "RR", value = 15 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
@@ -121,7 +123,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
                 new { type = "INVALID", value = 37 },
                 new { type = "HR", value = 60 },
                 new { type = "RR", value = 15 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
@@ -132,10 +134,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
     [Fact]
     public async Task post_returns_400_for_empty_measurements()
     {
-        var request = new
-        {
-            measurements = Array.Empty<object>()
-        };
+        var request = new { measurements = Array.Empty<object>() };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
 
@@ -153,7 +152,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
                 new { type = "TEMP", value = 38 },
                 new { type = "HR", value = 60 },
                 new { type = "RR", value = 15 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
@@ -162,7 +161,7 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
     }
 
     [Fact]
-    public async Task post_accepts_lowercase_measurement_types()
+    public async Task post_returns_400_for_lowercase_measurement_types()
     {
         var request = new
         {
@@ -171,15 +170,12 @@ public sealed class NewsScoreEndpointTests : IClassFixture<WebApplicationFactory
                 new { type = "temp", value = 37 },
                 new { type = "hr", value = 60 },
                 new { type = "rr", value = 15 },
-            }
+            },
         };
 
         var response = await _client.PostAsJsonAsync("/news-score", request);
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<ScoreResponse>();
-        Assert.NotNull(body);
-        Assert.Equal(0, body.Score);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     private sealed record ScoreResponse(int Score);

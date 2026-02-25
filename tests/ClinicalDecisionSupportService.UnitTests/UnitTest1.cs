@@ -24,6 +24,24 @@ public sealed class CalculateNewsScoreQueryHandlerTests
         Assert.Equal(1, fakeCalculator.Calls);
     }
 
+    [Fact]
+    public async Task handle_returns_validation_error_for_lowercase_measurement_type()
+    {
+        var fakeCalculator = new FakeNewsScoreCalculator(expectedScore: 7);
+        var sut = new CalculateNewsScoreQueryHandler(fakeCalculator);
+        var query = new CalculateNewsScoreQuery(
+        [
+            new CalculateNewsScoreMeasurementInput("temp", 37),
+        ]);
+
+        var result = await sut.Handle(query, CancellationToken.None);
+
+        Assert.True(result.IsErr());
+        Assert.NotNull(result.Error);
+        Assert.Equal("MEASUREMENT_TYPE_INVALID", result.Error.Code);
+        Assert.Equal(0, fakeCalculator.Calls);
+    }
+
     private sealed class FakeNewsScoreCalculator : INewsScoreCalculator
     {
         private readonly int _expectedScore;
