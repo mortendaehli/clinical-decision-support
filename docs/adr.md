@@ -1,9 +1,5 @@
 # Implement a General Clinical Decision Support Service for Scoring Algorithms
 
-## Status
-
-Accepted
-
 ## Context and Problem Statement
 
 Nursing home patients are at considerable risk for rapid deterioration. To identify important changes in condition as
@@ -20,18 +16,28 @@ Each of these heuristics is based on a set of measurements and a set of rules fo
 
 These are algorithms that are used to triage, prioritize, monitor, and make decisions about patient care. As such,
 they are part of what we call Clinical Decision Support (CDS). When used to triage, prioritize, and monitor patients,
-this software quickly becomes a Medical Device (Software as a Medical Device - SaMD) according to regulations like the
+this software **may** become a Medical Device (Software as a Medical Device - SaMD) according to regulations like the
 MDR. This means that we need to be very careful about how we design, implement, and deploy this software, and we need
 to be highly disciplined about how we validate and verify it.
 
-For the scope of this case, we will not focus heavily on the regulatory compliance aspects, but we must keep this
-context in mind as we design and implement the foundational architecture.
+**Note:** Best practice for NEWS-scoring and similar algorithms is to first capture vital sign measurements as discrete
+observations, and then have a separate calculation engine that queries those observations and applies the scoring rules
+to produce the NEWS score. This allows for more flexibility and better data integrity, as you can have multiple
+different algorithms that operate on the same underlying data without coupling the measurement capture to a specific
+scoring system. Another approach is to fill out both the observations and calculate the NEWS score in the same form.
+There are different designs here that may have significant implications on regulatory requirements depending on how you
+implement the user-flow.
+
+For the scope of this case, we will not focus heavily on the regulatory compliance aspects, but we will keep this
+context in mind as we design and implement the foundational architecture - keeping the design fairly loosely coupled and
+extensible to allow for future iterations that can support more complex use cases and potentially meet MDR requirements.
 
 ## Considered Options
 
-1. **Option 1:** A simple, static NEWS scoring service (hardcoded specifically for NEWS).
+1. **Option 1:** A simple, static NEWS scoring service (hardcoded specifically for the simple NEWS score).
 2. **Option 2:** A more general clinical decision support service that can support multiple heuristics and rule sets.
-3. **Option 3:** A full-fledged, event-driven clinical decision support engine that can support complex rules, multiple heuristics, and real-time asynchronous monitoring.
+3. **Option 3:** A full-fledged, event-driven clinical decision support engine that can support complex rules, multiple
+   heuristics, and real-time asynchronous monitoring/notifications.
 
 ## Decision Outcome
 
@@ -51,20 +57,28 @@ one of many possible clinical calculation strategies.
 #### Option 1: Simple static NEWS scoring service
 
 * **Good, because** it is the fastest to implement and directly satisfies the minimum requirements of the assignment.
-* **Bad, because** it tightly couples the API and business logic to one specific algorithm, violating the Open-Closed Principle.
-* **Bad, because** adding new clinical scores in the future would require modifying the core logic, increasing regression risks and complicating MDR auditing.
+* **Bad, because** it tightly couples the API and business logic to one specific algorithm, violating the Open-Closed
+  Principle.
+* **Bad, because** adding new clinical scores in the future would require modifying the core logic, increasing
+  regression risks and complicating MDR auditing.
 
 #### Option 2: General CDS service supporting multiple heuristics (Chosen)
 
-* **Good, because** it utilizes Domain-Driven Design (DDD) to separate the rule engine/strategy from the API transport layer.
-* **Good, because** new algorithms can be added simply by implementing a new strategy or configuration class without altering the core calculation engine.
-**Good, because** it facilitates strict unit testing of boundary conditions (e.g., ensuring all starting values are exclusive and ending values are inclusive ) in isolation.
+* **Good, because** it utilizes Domain-Driven Design (DDD) to separate the rule engine/strategy from the API transport
+  layer.
+* **Good, because** new algorithms can be added simply by implementing a new strategy or configuration class without
+  altering the core calculation engine.
+**Good, because** it facilitates strict unit testing of boundary conditions (e.g., ensuring all starting values are
+  exclusive and ending values are inclusive ) in isolation.
 
 
-* **Bad, because** it requires slightly more initial boilerplate (interfaces, factories, or strategy patterns) than a naive script.
+* **Bad, because** it requires slightly more initial boilerplate (interfaces, factories, or strategy patterns) than a
+  naive script.
 
 #### Option 3: Full-fledged event-driven CDS engine
 
-* **Good, because** it represents the ideal target architecture for a scalable, real-time clinical system (e.g., subscribing to FHIR Observation events).
+* **Good, because** it represents the ideal target architecture for a scalable, real-time clinical system (e.g.,
+  subscribing to FHIR Observation events).
 * **Good, because** it fully decouples data ingestion from clinical scoring calculations, allowing independent scaling.
-* **Bad, because** it is too complex to fully implement and demo effectively within the constraints of a standard case assignment. *(Note: We will discuss this as our target architectural vision for Phase 2 during the interview presentation).*
+* **Bad, because** it is too complex to fully implement and demo effectively within the constraints of a standard case
+  assignment. *(Note: We will discuss this as our target architectural vision for Phase 2 during the interview presentation).*
