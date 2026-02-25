@@ -1,6 +1,15 @@
-@ClinicalDecisionSupportService.Api_HostAddress = http://localhost:0
+@host = http://localhost:5090
 
-GET {{ClinicalDecisionSupportService.Api_HostAddress}}/weatherforecast/
+POST {{host}}/news-score
+Content-Type: application/json
 Accept: application/json
+
+{
+  "measurements": [
+    { "type": "TEMP", "value": 37 },
+    { "type": "HR", "value": 60 },
+    { "type": "RR", "value": 5 }
+  ]
+}
 
 ###

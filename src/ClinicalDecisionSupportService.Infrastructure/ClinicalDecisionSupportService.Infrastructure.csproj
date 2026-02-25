@@ -1,7 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\ClinicalDecisionSupportService.Application\ClinicalDecisionSupportService.Application.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ClinicalDecisionSupportService.Domain\ClinicalDecisionSupportService.Domain.csproj" />
   </ItemGroup>
 
