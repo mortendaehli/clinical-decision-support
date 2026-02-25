@@ -39,13 +39,24 @@ public sealed class NewsScoreCalculator : INewsScoreCalculator
         ],
     };
 
+    private static readonly List<MeasurementType> RequiredMeasurements =
+    [
+        MeasurementType.Temperature,
+        MeasurementType.HeartRate,
+        MeasurementType.RespiratoryRate,
+    ];
+
     public Result<int, DomainError> Calculate(IReadOnlyCollection<Measurement> measurements)
     {
         var providedByType = measurements
             .GroupBy(x => x.MeasurementType)
             .ToDictionary(group => group.Key, group => group.ToList());
 
-        foreach (var requiredRule in VitalSignCatalog.ByType.Values)
+        foreach (
+            var requiredRule in RequiredMeasurements.Select(requiredType =>
+                VitalSignCatalog.ByType[requiredType]
+            )
+        )
         {
             if (
                 !providedByType.TryGetValue(requiredRule.Type, out var entries)
