@@ -8,37 +8,40 @@ public sealed class MeasurementTests
 {
     [Theory]
     // TEMP valid range: (31, 42]
-    [InlineData(MeasurementType.Temperature, 31, false)]  // exclusive lower bound
-    [InlineData(MeasurementType.Temperature, 32, true)]   // just above lower bound
-    [InlineData(MeasurementType.Temperature, 37, true)]   // normal value
-    [InlineData(MeasurementType.Temperature, 42, true)]   // inclusive upper bound
-    [InlineData(MeasurementType.Temperature, 43, false)]  // above upper bound
+    [InlineData(MeasurementType.TEMP, 31, false)]
+    [InlineData(MeasurementType.TEMP, 32, true)]
+    [InlineData(MeasurementType.TEMP, 37, true)]
+    [InlineData(MeasurementType.TEMP, 42, true)]
+    [InlineData(MeasurementType.TEMP, 43, false)]
     // HR valid range: (25, 220]
-    [InlineData(MeasurementType.HeartRate, 25, false)]     // exclusive lower bound
-    [InlineData(MeasurementType.HeartRate, 26, true)]      // just above lower bound
-    [InlineData(MeasurementType.HeartRate, 70, true)]      // normal value
-    [InlineData(MeasurementType.HeartRate, 220, true)]     // inclusive upper bound
-    [InlineData(MeasurementType.HeartRate, 221, false)]    // above upper bound
+    [InlineData(MeasurementType.HR, 25, false)]
+    [InlineData(MeasurementType.HR, 26, true)]
+    [InlineData(MeasurementType.HR, 70, true)]
+    [InlineData(MeasurementType.HR, 220, true)]
+    [InlineData(MeasurementType.HR, 221, false)]
     // RR valid range: (3, 60]
-    [InlineData(MeasurementType.RespiratoryRate, 3, false)]  // exclusive lower bound
-    [InlineData(MeasurementType.RespiratoryRate, 4, true)]   // just above lower bound
-    [InlineData(MeasurementType.RespiratoryRate, 15, true)]  // normal value
-    [InlineData(MeasurementType.RespiratoryRate, 60, true)]  // inclusive upper bound
-    [InlineData(MeasurementType.RespiratoryRate, 61, false)] // above upper bound
+    [InlineData(MeasurementType.RR, 3, false)]
+    [InlineData(MeasurementType.RR, 4, true)]
+    [InlineData(MeasurementType.RR, 15, true)]
+    [InlineData(MeasurementType.RR, 60, true)]
+    [InlineData(MeasurementType.RR, 61, false)]
     public void create_validates_value_within_acceptable_range(
-        MeasurementType type, int value, bool shouldSucceed)
+        MeasurementType measurementType,
+        int value,
+        bool shouldSucceed
+    )
     {
-        var result = Measurement.Create(type, value);
+        var result = Measurement.Create(measurementType, value);
 
         if (shouldSucceed)
         {
-            Assert.True(result.IsOk(), $"Expected success for {type}={value}");
-            Assert.Equal(type, result.Value.MeasurementType);
+            Assert.True(result.IsOk(), $"Expected success for {measurementType}={value}");
+            Assert.Equal(measurementType, result.Value.Type);
             Assert.Equal(value, result.Value.Value);
         }
         else
         {
-            Assert.True(result.IsErr(), $"Expected failure for {type}={value}");
+            Assert.True(result.IsErr(), $"Expected failure for {measurementType}={value}");
             Assert.Equal(DomainErrorType.Validation, result.Error.Type);
         }
     }

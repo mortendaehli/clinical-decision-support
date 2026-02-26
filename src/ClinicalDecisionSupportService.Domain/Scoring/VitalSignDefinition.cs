@@ -2,9 +2,12 @@ using ClinicalDecisionSupportService.Domain.Enums;
 
 namespace ClinicalDecisionSupportService.Domain.Scoring;
 
-public sealed record VitalSign(
+public sealed record VitalSignDefinition(
     MeasurementType Type,
-    string Code,
     string DisplayName,
-    RangeRule ValidRange,
-    string OutOfRangeErrorCode);
+    RangeRule PhysiologicalRange,
+    string OutOfRangeErrorCode
+)
+{
+    public string Code => Type.ToString();
+}

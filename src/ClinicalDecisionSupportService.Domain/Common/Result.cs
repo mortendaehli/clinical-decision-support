@@ -266,7 +266,7 @@ public readonly record struct Result<T, E>
     /// </example>
     public Result<K, E> Map<K>(Func<T, K> mapper)
     {
-        return IsOk() ? Result<K, E>.Ok(mapper(Value!)) : Result<K, E>.Err(Error!);
+        return IsOk() ? mapper(Value!) : Error!;
     }
 
     /// <summary>
@@ -296,6 +296,6 @@ public readonly record struct Result<T, E>
     /// </example>
     public Result<T, K> MapErr<K>(Func<E, K> mapper)
     {
-        return IsOk() ? Result<T, K>.Ok(Value!) : Result<T, K>.Err(mapper(Error!));
+        return IsOk() ? Value! : mapper(Error!);
     }
 }

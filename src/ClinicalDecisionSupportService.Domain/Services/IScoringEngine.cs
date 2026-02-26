@@ -3,7 +3,7 @@ using ClinicalDecisionSupportService.Domain.ValueObjects;
 
 namespace ClinicalDecisionSupportService.Domain.Services;
 
-public interface INewsScoreCalculator
+public interface IScoringEngine
 {
-    Result<int, DomainError> Calculate(IReadOnlyCollection<Measurement> measurements);
+    Result<int, DomainError> Calculate(string modelId, IReadOnlyCollection<Measurement> measurements);
 }

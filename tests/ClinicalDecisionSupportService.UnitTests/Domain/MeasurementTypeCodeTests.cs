@@ -1,33 +1,20 @@
 using ClinicalDecisionSupportService.Domain.Enums;
+using ClinicalDecisionSupportService.Domain.Scoring;
 
 namespace ClinicalDecisionSupportService.UnitTests.Domain;
 
-public sealed class MeasurementTypeCodeTests
+public sealed class MeasurementTypeParsingTests
 {
     [Theory]
-    [InlineData(MeasurementType.Temperature, "TEMP")]
-    [InlineData(MeasurementType.HeartRate, "HR")]
-    [InlineData(MeasurementType.RespiratoryRate, "RR")]
-    public void to_code_returns_expected_canonical_value(MeasurementType measurementType, string expectedCode)
+    [InlineData("TEMP", MeasurementType.TEMP)]
+    [InlineData("HR", MeasurementType.HR)]
+    [InlineData("RR", MeasurementType.RR)]
+    public void try_parse_type_accepts_canonical_codes(string code, MeasurementType expectedType)
     {
-        var code = MeasurementTypeCode.ToCode(measurementType);
-
-        Assert.Equal(expectedCode, code);
-    }
-
-    [Theory]
-    [InlineData("TEMP", MeasurementType.Temperature)]
-    [InlineData("HR", MeasurementType.HeartRate)]
-    [InlineData("RR", MeasurementType.RespiratoryRate)]
-    public void try_parse_strict_accepts_supported_canonical_codes(
-        string code,
-        MeasurementType expectedType
-    )
-    {
-        var success = MeasurementTypeCode.TryParseStrict(code, out var parsedType);
+        var success = VitalSignDefinitions.TryParseType(code, out var measurementType);
 
         Assert.True(success);
-        Assert.Equal(expectedType, parsedType);
+        Assert.Equal(expectedType, measurementType);
     }
 
     [Theory]
@@ -35,9 +22,11 @@ public sealed class MeasurementTypeCodeTests
     [InlineData("Hr")]
     [InlineData("rr")]
     [InlineData("SPO2")]
-    public void try_parse_strict_rejects_non_canonical_or_unsupported_codes(string code)
+    [InlineData("")]
+    [InlineData(" ")]
+    public void try_parse_type_rejects_invalid_codes(string code)
     {
-        var success = MeasurementTypeCode.TryParseStrict(code, out _);
+        var success = VitalSignDefinitions.TryParseType(code, out _);
 
         Assert.False(success);
     }
@@ -45,6 +34,6 @@ public sealed class MeasurementTypeCodeTests
     [Fact]
     public void supported_codes_contains_expected_values()
     {
-        Assert.Equal(["TEMP", "HR", "RR"], MeasurementTypeCode.SupportedCodes);
+        Assert.Equal(["TEMP", "HR", "RR"], VitalSignDefinitions.SupportedCodes);
     }
 }

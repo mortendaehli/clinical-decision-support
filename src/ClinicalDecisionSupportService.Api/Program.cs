@@ -1,6 +1,7 @@
 using ClinicalDecisionSupportService.Api.Endpoints.NewsScore;
 using ClinicalDecisionSupportService.Api.Extensions;
 using ClinicalDecisionSupportService.Api.Middleware;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,8 @@ app.UseApiMiddleware();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApiEndpoints();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.MapNewsScoreEndpoints();

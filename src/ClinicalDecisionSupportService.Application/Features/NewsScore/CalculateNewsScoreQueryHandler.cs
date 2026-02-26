@@ -1,5 +1,6 @@
 using ClinicalDecisionSupportService.Domain.Common;
 using ClinicalDecisionSupportService.Domain.Enums;
+using ClinicalDecisionSupportService.Domain.Scoring;
 using ClinicalDecisionSupportService.Domain.Services;
 using ClinicalDecisionSupportService.Domain.ValueObjects;
 
@@ -7,11 +8,13 @@ namespace ClinicalDecisionSupportService.Application.Features.NewsScore;
 
 public sealed class CalculateNewsScoreQueryHandler : ICalculateNewsScoreQueryHandler
 {
-    private readonly INewsScoreCalculator _newsScoreCalculator;
+    private const string NewsModelId = "NEWS";
 
-    public CalculateNewsScoreQueryHandler(INewsScoreCalculator newsScoreCalculator)
+    private readonly IScoringEngine _scoringEngine;
+
+    public CalculateNewsScoreQueryHandler(IScoringEngine scoringEngine)
     {
-        _newsScoreCalculator = newsScoreCalculator;
+        _scoringEngine = scoringEngine;
     }
 
     public Task<Result<CalculateNewsScoreResult, DomainError>> Handle(
@@ -19,9 +22,11 @@ public sealed class CalculateNewsScoreQueryHandler : ICalculateNewsScoreQueryHan
         CancellationToken cancellationToken
     )
     {
+        _ = cancellationToken;
+
         if (query.Measurements is null || query.Measurements.Count == 0)
         {
-            return Task.FromResult<Result<CalculateNewsScoreResult, DomainError>>(
+            return Error(
                 DomainError.Validation(
                     code: "MEASUREMENTS_REQUIRED",
                     message: "At least one measurement is required.",
@@ -39,9 +44,7 @@ public sealed class CalculateNewsScoreQueryHandler : ICalculateNewsScoreQueryHan
             var measurementTypeResult = ParseMeasurementType(input.Type, $"measurements[{i}].type");
             if (measurementTypeResult.IsErr())
             {
-                return Task.FromResult<Result<CalculateNewsScoreResult, DomainError>>(
-                    measurementTypeResult.Error!
-                );
+                return Error(measurementTypeResult.Error!);
             }
 
             var measurementResult = Measurement.Create(
@@ -52,23 +55,21 @@ public sealed class CalculateNewsScoreQueryHandler : ICalculateNewsScoreQueryHan
 
             if (measurementResult.IsErr())
             {
-                return Task.FromResult<Result<CalculateNewsScoreResult, DomainError>>(
-                    measurementResult.Error!
-                );
+                return Error(measurementResult.Error!);
             }
 
             measurements.Add(measurementResult.Value!);
         }
 
-        var scoreResult = _newsScoreCalculator.Calculate(measurements);
+        var scoreResult = _scoringEngine.Calculate(NewsModelId, measurements);
 
         return Task.FromResult(scoreResult.Map(score => new CalculateNewsScoreResult(score)));
     }
 
-    private static Result<MeasurementType, DomainError> ParseMeasurementType(
-        string? value,
-        string field
-    )
+    private static Task<Result<CalculateNewsScoreResult, DomainError>> Error(DomainError error) =>
+        Task.FromResult<Result<CalculateNewsScoreResult, DomainError>>(error);
+
+    private static Result<MeasurementType, DomainError> ParseMeasurementType(string? value, string field)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -79,11 +80,11 @@ public sealed class CalculateNewsScoreQueryHandler : ICalculateNewsScoreQueryHan
             );
         }
 
-        if (!MeasurementTypeCode.TryParseStrict(value.Trim(), out var measurementType))
+        if (!VitalSignDefinitions.TryParseType(value, out var measurementType))
         {
             return DomainError.Validation(
                 code: "MEASUREMENT_TYPE_INVALID",
-                message: "Measurement type must be one of: TEMP, HR, RR.",
+                message: $"Measurement type must be one of: {string.Join(", ", VitalSignDefinitions.SupportedCodes)}.",
                 field: field
             );
         }

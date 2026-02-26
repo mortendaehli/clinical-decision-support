@@ -1,6 +1,6 @@
 using ClinicalDecisionSupportService.Application.Extensions;
 using ClinicalDecisionSupportService.Api.Endpoints.NewsScore;
-using ClinicalDecisionSupportService.Domain.Enums;
+using ClinicalDecisionSupportService.Domain.Scoring;
 using ClinicalDecisionSupportService.Infrastructure.Extensions;
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;
@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
                 }
 
                 openApiMeasurementTypeSchema.Type = JsonSchemaType.String;
-                openApiMeasurementTypeSchema.Enum = MeasurementTypeCode
+                openApiMeasurementTypeSchema.Enum = VitalSignDefinitions
                     .SupportedCodes.Select(code => (JsonNode)JsonValue.Create(code)!)
                     .ToList();
 

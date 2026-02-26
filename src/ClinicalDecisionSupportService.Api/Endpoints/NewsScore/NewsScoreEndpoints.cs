@@ -1,8 +1,6 @@
 using ClinicalDecisionSupportService.Api.Extensions;
-using ClinicalDecisionSupportService.Api.Mappings;
 using ClinicalDecisionSupportService.Application.Features.NewsScore;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ClinicalDecisionSupportService.Api.Endpoints.NewsScore;
 
